@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>📋 PhuocIT TEST NEW v2.2 - Dashboard Fixed - Quản lý bán hàng offline</title>
+    <title>📋 NAV QLBH KHO</title>
     <meta name="description"
         content="Hệ thống quản lý bán hàng PhuocIT cho doanh nghiệp Việt Nam - hoạt động hoàn toàn offline">
 
@@ -42,11 +42,7 @@
                 <button type="submit" class="login-button">Đăng nhập</button>
             </form>
 
-            <div class="login-info">
-                <strong>Thông tin đăng nhập:</strong><br>
-                Tên đăng nhập: <strong>Admin</strong><br>
-                Mật khẩu: <strong>Matkhau@123</strong>
-            </div>
+
         </div>
     </div>
 
@@ -10749,11 +10745,11 @@
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
 
-            console.log('🔐 Login attempt:', { username, password });
-            console.log('🔐 Expected: Admin / Matkhau@123');
+            console.log('🔐 Login attempt:', { username });
+            console.log('🔐 Expected credentials updated');
 
             // Check credentials
-            if (username === 'Admin' && password === 'Matkhau@123') {
+            if (username === 'nhan' && password === 'KkanhNAV2026') {
                 // Hide login screen
                 document.getElementById('loginScreen').style.display = 'none';
                 // Show main app
@@ -10771,7 +10767,7 @@
                             console.log('App is now available globally as window.app');
                         }
                     }, 200);
-                    showNotification('Đăng nhập thành công! Chào mừng Admin', 'success');
+                    showNotification('Đăng nhập thành công! Chào mừng nhan', 'success');
                 }, 100);
             } else {
                 // Show error message
