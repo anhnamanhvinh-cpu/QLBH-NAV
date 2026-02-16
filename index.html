@@ -12,6 +12,10 @@
         content="Hệ thống quản lý bán hàng PhuocIT cho doanh nghiệp Việt Nam - hoạt động hoàn toàn offline">
 
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase SDK (Compat version for simplicity) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 
 <body>
@@ -300,113 +304,84 @@
     </div>
 
     <script>
-        // ============================================================
-        // CẤU HÌNH GOOGLE SHEETS - THAY ĐỔI URL SAU KHI DEPLOY
-        // ============================================================
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRdaofSuUBV9oqMlki9VLqiav376YkjMSPK_vPCIzTrFYPd9HvoF05mOIhXaRj89h9/exec';
-        // ============================================================
+        // ======================== Firebase API Class ========================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFOKB3oVCsLpmcoRyp4iLJwEX7tPVmpLc",
+            authDomain: "anav-qlbhk.firebaseapp.com",
+            databaseURL: "https://anav-qlbhk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "anav-qlbhk",
+            storageBucket: "anav-qlbhk.firebasestorage.app",
+            messagingSenderId: "928899456473",
+            appId: "1:928899456473:web:3d385a29b78b8d8c574dc8",
+            measurementId: "G-TVRJKHVF9H"
+        };
 
-        // ======================== Google Sheets API Class ========================
-        class GoogleSheetsAPI {
-            constructor(scriptUrl) {
-                this.scriptUrl = scriptUrl;
-                this.isConfigured = scriptUrl && scriptUrl !== 'PASTE_YOUR_DEPLOYMENT_URL_HERE';
-                this.deviceId = this.getOrCreateDeviceId();
-            }
-
-            // Tạo hoặc lấy Device ID duy nhất cho thiết bị này
-            getOrCreateDeviceId() {
-                let id = localStorage.getItem('_device_id');
-                if (!id) {
-                    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-                    localStorage.setItem('_device_id', id);
+        class FirebaseAPI {
+            constructor() {
+                // Initialize Firebase
+                if (typeof firebase === 'undefined') {
+                    console.error('🔥 Firebase SDK not loaded!');
+                    updateSyncStatus('failed', '❌ Lỗi SDK');
+                    alert('Lỗi: Không tải được thư viện Firebase. Hãy kiểm tra kết nối mạng!');
+                    return;
                 }
-                return id;
-            }
 
-            // Kiểm tra kết nối
-            async ping() {
-                if (!this.isConfigured) return false;
-                try {
-                    const res = await fetch(this.scriptUrl + '?action=ping&_t=' + Date.now());
-                    const data = await res.json();
-                    return data.success === true;
-                } catch (e) {
-                    console.warn('☁️ Không thể kết nối Google Sheets:', e.message);
-                    return false;
-                }
-            }
-
-            // Lấy timestamp từ Cloud (kiểm tra nhanh không cần tải hết dữ liệu)
-            async getTimestamp() {
-                if (!this.isConfigured) return null;
-                try {
-                    const res = await fetch(this.scriptUrl + '?action=getTimestamp&_t=' + Date.now());
-                    const json = await res.json();
-                    if (json.success) {
-                        return json.data; // { lastModified, deviceId }
+                if (!firebase.apps.length) {
+                    try {
+                        firebase.initializeApp(firebaseConfig);
+                    } catch (e) {
+                        console.error('🔥 Firebase Init Error:', e);
+                        updateSyncStatus('failed', '❌ Lỗi Config');
+                        return;
                     }
-                    return null;
-                } catch (e) {
-                    console.warn('☁️ Lỗi lấy timestamp:', e.message);
-                    return null;
                 }
+                this.db = firebase.database();
+                this.connected = false;
+
+                // Monitor connection state
+                this.db.ref('.info/connected').on('value', (snap) => {
+                    this.connected = snap.val() === true;
+                    console.log('🔥 Firebase Connected:', this.connected);
+                    updateSyncStatus(this.connected ? 'online' : 'offline');
+                });
             }
 
-            // Lấy toàn bộ dữ liệu từ Google Sheet
-            async fetchAll() {
-                if (!this.isConfigured) return null;
-                try {
-                    const res = await fetch(this.scriptUrl + '?action=getAll&_t=' + Date.now());
-                    const json = await res.json();
-                    if (json.success) {
-                        console.log('☁️ Đã tải dữ liệu từ Google Sheets');
-                        return json.data;
+            // Listen to data changes (Realtime)
+            subscribe(callback) {
+                const dataRef = this.db.ref('data');
+                dataRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        callback(data);
                     }
-                    console.warn('☁️ Lỗi từ server:', json.error);
-                    return null;
-                } catch (e) {
-                    console.warn('☁️ Lỗi kết nối Google Sheets:', e.message);
-                    return null;
-                }
+                });
+                console.log('🔥 Subscribed to data changes');
             }
 
-            // Lưu toàn bộ dữ liệu lên Google Sheet (có deviceId + timestamp)
+            // Save all data (Overwrite)
             async saveAll(data) {
-                if (!this.isConfigured) return false;
-                const timestamp = new Date().toISOString();
+                if (!this.connected) return { success: false, error: 'Offline' };
                 try {
-                    const res = await fetch(this.scriptUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify({
-                            action: 'saveAll',
-                            data: data,
-                            deviceId: this.deviceId,
-                            timestamp: timestamp
-                        })
-                    });
-                    const json = await res.json();
-                    if (json.success) {
-                        console.log('☁️ Đã lưu dữ liệu lên Google Sheets, timestamp:', timestamp);
-                        // Lưu thời gian sync thành công
-                        localStorage.setItem('_last_cloud_push', timestamp);
-                        localStorage.setItem('_last_cloud_push_status', 'success');
-                        return { success: true, timestamp: timestamp };
-                    }
-                    console.warn('☁️ Lỗi lưu:', json.error);
-                    localStorage.setItem('_last_cloud_push_status', 'failed');
-                    return false;
+                    await this.db.ref('data').set(data);
+                    return { success: true, timestamp: new Date().toISOString() };
                 } catch (e) {
-                    console.warn('☁️ Lỗi ghi Google Sheets:', e.message);
-                    localStorage.setItem('_last_cloud_push_status', 'failed');
-                    return false;
+                    console.error('🔥 Save Error:', e);
+                    return { success: false, error: e.message };
                 }
+            }
+
+            // Compatibility methods for existing code
+            get isConfigured() { return true; }
+            async ping() { return this.connected; }
+            async getTimestamp() { return { lastModified: new Date().toISOString() }; }
+            async fetchAll() {
+                const snap = await this.db.ref('data').once('value');
+                return snap.val();
             }
         }
 
         // Khởi tạo API
-        const sheetsAPI = new GoogleSheetsAPI(GOOGLE_SCRIPT_URL);
+        const sheetsAPI = new FirebaseAPI();
 
         // ======================== Sync UI Helpers ========================
         function showSyncOverlay(message) {
@@ -436,7 +411,15 @@
             const textEl = document.getElementById('syncStatusText');
             if (!iconEl || !textEl) return;
 
-            if (status === 'success') {
+            if (status === 'online') {
+                iconEl.textContent = '🟢';
+                textEl.textContent = 'Kết nối';
+                textEl.style.color = '#059669';
+            } else if (status === 'offline') {
+                iconEl.textContent = '⚫';
+                textEl.textContent = 'Mất mạng';
+                textEl.style.color = '#6b7280';
+            } else if (status === 'success') {
                 iconEl.textContent = '🟢';
                 textEl.textContent = message || 'Đã đồng bộ';
                 textEl.style.color = '#059669';
@@ -546,50 +529,29 @@
 
             // ======================== Cloud Sync Methods ========================
 
-            // Đồng bộ lần đầu khi mở app (background)
+            // Đồng bộ thời gian thực (Realtime Sync)
             async initialCloudSync() {
-                if (!sheetsAPI.isConfigured) {
-                    console.log('☁️ Google Sheets chưa cấu hình - chạy offline mode');
-                    return;
-                }
-                initSyncStatusDisplay(); // Hiển thị trạng thái sync từ lần trước
-                try {
-                    console.log('☁️ Đang kiểm tra dữ liệu trên Cloud...');
-                    // Kiểm tra timestamp trước để quyết định hướng sync
-                    const cloudMeta = await sheetsAPI.getTimestamp();
-                    const localLastPush = localStorage.getItem('_last_cloud_push');
+                console.log('🔗 [Firebase] Connecting real-time listener...');
+                initSyncStatusDisplay();
 
-                    if (cloudMeta && cloudMeta.lastModified) {
-                        const cloudTime = new Date(cloudMeta.lastModified).getTime();
-                        const localTime = localLastPush ? new Date(localLastPush).getTime() : 0;
+                // Lắng nghe thay đổi từ Firebase
+                sheetsAPI.subscribe((data) => {
+                    console.log('🔥 [Firebase] Received Update:', data ? 'Data OK' : 'Empty');
 
-                        if (cloudMeta.deviceId !== sheetsAPI.deviceId && cloudTime > localTime) {
-                            // Cloud được cập nhật bởi thiết bị KHÁC và mới hơn local → tải về
-                            console.log('☁️ Cloud mới hơn (từ thiết bị khác), đang tải về...');
-                            const cloudData = await sheetsAPI.fetchAll();
-                            if (cloudData && this.hasCloudData(cloudData)) {
-                                this.mergeCloudData(cloudData);
-                                this.saveToLocalStorageOnly();
-                                this.loadPage(this.currentPage);
-                                updateSyncStatus('success', '✅ Đã tải từ Cloud');
-                                this.showNotification('☁️ Đã đồng bộ dữ liệu từ Cloud', 'success');
-                            }
-                        } else {
-                            console.log('☁️ Local đã là bản mới nhất');
-                            updateSyncStatus('success', '✅ Đã cập nhật');
+                    if (data) {
+                        this.mergeCloudData(data);
+                        // Lưu xuống localStorage nhưng KHÔNG đẩy ngược lên Cloud (tránh vòng lặp)
+                        this.saveToLocalStorageOnly();
+
+                        // Cập nhật giao diện nếu đang ở trang liên quan
+                        if (this.currentPage === 'dashboard' || this.currentPage === 'products' || this.currentPage === 'orders') {
+                            this.loadPage(this.currentPage);
                         }
-                    } else {
-                        // Cloud trống → đẩy dữ liệu local lên
-                        console.log('☁️ Cloud trống, đang upload dữ liệu local...');
-                        const result = await sheetsAPI.saveAll(this.demoData);
-                        if (result && result.success) {
-                            updateSyncStatus('success', '✅ Upload lần đầu');
-                            this.showNotification('☁️ Đã tải dữ liệu lên Cloud lần đầu', 'success');
-                        }
+
+                        const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                        updateSyncStatus('success', `✅ Cập nhật ${timeStr}`);
                     }
-                } catch (e) {
-                    console.warn('☁️ Lỗi đồng bộ ban đầu:', e.message);
-                }
+                });
             }
 
             // Kiểm tra cloud có dữ liệu không
@@ -706,11 +668,11 @@
                         this.showNotification('☁️ Đã tải dữ liệu lên Cloud!', 'success');
                     } else {
                         updateSyncStatus('failed', '❌ Lỗi tải lên');
-                        this.showNotification('❌ Lưu Cloud thất bại', 'error');
+                        this.showNotification('❌ Lưu Cloud thất bại: ' + (result.error || 'Không rõ'), 'error');
                     }
                 } catch (e) {
                     updateSyncStatus('failed', '❌ Lỗi tải lên');
-                    this.showNotification('❌ Lỗi: ' + e.message, 'error');
+                    this.showNotification('❌ Lỗi exception: ' + e.message, 'error');
                 } finally {
                     hideSyncOverlay();
                     updateSyncButton(false);
