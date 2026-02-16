@@ -172,24 +172,77 @@
                         Đơn hàng
                     </button>
 
-                    <button id="syncButton" onclick="if(window.app) { window.app.syncFromCloud(); }" style="
-                        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+                    <button onclick="if(window.app) { window.app.pushToCloud(); }" title="Đẩy dữ liệu từ máy lên Cloud"
+                        style="
+                        background: linear-gradient(135deg, #059669 0%, #047857 100%);
                         color: white;
                         border: none;
-                        padding: 8px 16px;
+                        padding: 8px 12px;
                         border-radius: 8px;
                         cursor: pointer;
-                        font-size: 14px;
+                        font-size: 13px;
                         font-weight: 600;
                         display: flex;
                         align-items: center;
-                        gap: 6px;
+                        gap: 4px;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(5, 150, 105, 0.3)'"
+                        onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                        <span>⬆️</span>
+                        <span>Tải lên</span>
+                    </button>
+
+                    <button id="syncButton" onclick="if(window.app) { window.app.fullSync(); }"
+                        title="Upload trước, rồi Download (đồng bộ 2 chiều)" style="
+                        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+                        color: white;
+                        border: none;
+                        padding: 8px 12px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 13px;
+                        font-weight: 600;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
                         transition: all 0.3s ease;
                     " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'"
                         onmouseout="this.style.transform=''; this.style.boxShadow=''">
                         <span id="syncIcon">🔄</span>
                         <span id="syncText">Đồng bộ</span>
                     </button>
+
+                    <button onclick="if(window.app) { window.app.downloadFromCloud(); }"
+                        title="Kéo dữ liệu từ Cloud về máy" style="
+                        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                        color: white;
+                        border: none;
+                        padding: 8px 12px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 13px;
+                        font-weight: 600;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(37, 99, 235, 0.3)'"
+                        onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                        <span>⬇️</span>
+                        <span>Tải về</span>
+                    </button>
+
+                    <div id="syncStatusIndicator" style="
+                        font-size: 11px;
+                        color: #6b7280;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        min-width: 80px;
+                    ">
+                        <span id="syncStatusIcon">⚪</span>
+                        <span id="syncStatusText">Chưa đồng bộ</span>
+                    </div>
 
 
                     <button onclick="logout()" style="
@@ -258,6 +311,17 @@
             constructor(scriptUrl) {
                 this.scriptUrl = scriptUrl;
                 this.isConfigured = scriptUrl && scriptUrl !== 'PASTE_YOUR_DEPLOYMENT_URL_HERE';
+                this.deviceId = this.getOrCreateDeviceId();
+            }
+
+            // Tạo hoặc lấy Device ID duy nhất cho thiết bị này
+            getOrCreateDeviceId() {
+                let id = localStorage.getItem('_device_id');
+                if (!id) {
+                    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                    localStorage.setItem('_device_id', id);
+                }
+                return id;
             }
 
             // Kiểm tra kết nối
@@ -270,6 +334,22 @@
                 } catch (e) {
                     console.warn('☁️ Không thể kết nối Google Sheets:', e.message);
                     return false;
+                }
+            }
+
+            // Lấy timestamp từ Cloud (kiểm tra nhanh không cần tải hết dữ liệu)
+            async getTimestamp() {
+                if (!this.isConfigured) return null;
+                try {
+                    const res = await fetch(this.scriptUrl + '?action=getTimestamp');
+                    const json = await res.json();
+                    if (json.success) {
+                        return json.data; // { lastModified, deviceId }
+                    }
+                    return null;
+                } catch (e) {
+                    console.warn('☁️ Lỗi lấy timestamp:', e.message);
+                    return null;
                 }
             }
 
@@ -291,24 +371,35 @@
                 }
             }
 
-            // Lưu toàn bộ dữ liệu lên Google Sheet
+            // Lưu toàn bộ dữ liệu lên Google Sheet (có deviceId + timestamp)
             async saveAll(data) {
                 if (!this.isConfigured) return false;
+                const timestamp = new Date().toISOString();
                 try {
                     const res = await fetch(this.scriptUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify({ action: 'saveAll', data: data })
+                        body: JSON.stringify({
+                            action: 'saveAll',
+                            data: data,
+                            deviceId: this.deviceId,
+                            timestamp: timestamp
+                        })
                     });
                     const json = await res.json();
                     if (json.success) {
-                        console.log('☁️ Đã lưu dữ liệu lên Google Sheets');
-                        return true;
+                        console.log('☁️ Đã lưu dữ liệu lên Google Sheets, timestamp:', timestamp);
+                        // Lưu thời gian sync thành công
+                        localStorage.setItem('_last_cloud_push', timestamp);
+                        localStorage.setItem('_last_cloud_push_status', 'success');
+                        return { success: true, timestamp: timestamp };
                     }
                     console.warn('☁️ Lỗi lưu:', json.error);
+                    localStorage.setItem('_last_cloud_push_status', 'failed');
                     return false;
                 } catch (e) {
                     console.warn('☁️ Lỗi ghi Google Sheets:', e.message);
+                    localStorage.setItem('_last_cloud_push_status', 'failed');
                     return false;
                 }
             }
@@ -337,6 +428,43 @@
             } else {
                 if (icon) icon.textContent = '🔄';
                 if (text) text.textContent = 'Đồng bộ';
+            }
+        }
+        // Cập nhật trạng thái sync trên header
+        function updateSyncStatus(status, message) {
+            const iconEl = document.getElementById('syncStatusIcon');
+            const textEl = document.getElementById('syncStatusText');
+            if (!iconEl || !textEl) return;
+
+            if (status === 'success') {
+                iconEl.textContent = '🟢';
+                textEl.textContent = message || 'Đã đồng bộ';
+                textEl.style.color = '#059669';
+            } else if (status === 'failed') {
+                iconEl.textContent = '🔴';
+                textEl.textContent = message || 'Lỗi đồng bộ';
+                textEl.style.color = '#dc2626';
+            } else if (status === 'syncing') {
+                iconEl.textContent = '🟡';
+                textEl.textContent = message || 'Đang đồng bộ...';
+                textEl.style.color = '#d97706';
+            } else {
+                iconEl.textContent = '⚪';
+                textEl.textContent = message || 'Chưa đồng bộ';
+                textEl.style.color = '#6b7280';
+            }
+        }
+        // Hiển thị trạng thái sync khi mở trang
+        function initSyncStatusDisplay() {
+            const lastPush = localStorage.getItem('_last_cloud_push');
+            const lastStatus = localStorage.getItem('_last_cloud_push_status');
+            if (lastPush && lastStatus === 'success') {
+                const d = new Date(lastPush);
+                const timeStr = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                const dateStr = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+                updateSyncStatus('success', `✅ ${dateStr} ${timeStr}`);
+            } else if (lastStatus === 'failed') {
+                updateSyncStatus('failed', '⚠️ Lần cuối lỗi');
             }
         }
 
@@ -424,20 +552,40 @@
                     console.log('☁️ Google Sheets chưa cấu hình - chạy offline mode');
                     return;
                 }
+                initSyncStatusDisplay(); // Hiển thị trạng thái sync từ lần trước
                 try {
                     console.log('☁️ Đang kiểm tra dữ liệu trên Cloud...');
-                    const cloudData = await sheetsAPI.fetchAll();
-                    if (cloudData && this.hasCloudData(cloudData)) {
-                        console.log('☁️ Tìm thấy dữ liệu trên Cloud, đang merge...');
-                        this.mergeCloudData(cloudData);
-                        this.saveToLocalStorageOnly();
-                        this.loadPage(this.currentPage);
-                        this.showNotification('☁️ Đã đồng bộ dữ liệu từ Cloud', 'success');
+                    // Kiểm tra timestamp trước để quyết định hướng sync
+                    const cloudMeta = await sheetsAPI.getTimestamp();
+                    const localLastPush = localStorage.getItem('_last_cloud_push');
+
+                    if (cloudMeta && cloudMeta.lastModified) {
+                        const cloudTime = new Date(cloudMeta.lastModified).getTime();
+                        const localTime = localLastPush ? new Date(localLastPush).getTime() : 0;
+
+                        if (cloudMeta.deviceId !== sheetsAPI.deviceId && cloudTime > localTime) {
+                            // Cloud được cập nhật bởi thiết bị KHÁC và mới hơn local → tải về
+                            console.log('☁️ Cloud mới hơn (từ thiết bị khác), đang tải về...');
+                            const cloudData = await sheetsAPI.fetchAll();
+                            if (cloudData && this.hasCloudData(cloudData)) {
+                                this.mergeCloudData(cloudData);
+                                this.saveToLocalStorageOnly();
+                                this.loadPage(this.currentPage);
+                                updateSyncStatus('success', '✅ Đã tải từ Cloud');
+                                this.showNotification('☁️ Đã đồng bộ dữ liệu từ Cloud', 'success');
+                            }
+                        } else {
+                            console.log('☁️ Local đã là bản mới nhất');
+                            updateSyncStatus('success', '✅ Đã cập nhật');
+                        }
                     } else {
                         // Cloud trống → đẩy dữ liệu local lên
                         console.log('☁️ Cloud trống, đang upload dữ liệu local...');
-                        await sheetsAPI.saveAll(this.demoData);
-                        this.showNotification('☁️ Đã tải dữ liệu lên Cloud lần đầu', 'success');
+                        const result = await sheetsAPI.saveAll(this.demoData);
+                        if (result && result.success) {
+                            updateSyncStatus('success', '✅ Upload lần đầu');
+                            this.showNotification('☁️ Đã tải dữ liệu lên Cloud lần đầu', 'success');
+                        }
                     }
                 } catch (e) {
                     console.warn('☁️ Lỗi đồng bộ ban đầu:', e.message);
@@ -463,25 +611,43 @@
                 });
             }
 
-            // Nút "Đồng bộ" thủ công
-            async syncFromCloud() {
+            // ====== NÚT "ĐỒNG BỘ" - Full Sync 2 chiều (UPLOAD trước, rồi DOWNLOAD) ======
+            async fullSync() {
                 if (!sheetsAPI.isConfigured) {
                     this.showNotification('⚠️ Chưa cấu hình Google Sheets URL. Hãy dán URL vào biến GOOGLE_SCRIPT_URL trong file HTML.', 'error');
                     return;
                 }
                 updateSyncButton(true);
-                showSyncOverlay('Đang tải dữ liệu từ Google Sheets...');
+                updateSyncStatus('syncing');
+
                 try {
+                    // BƯỚC 1: Upload dữ liệu local lên Cloud
+                    showSyncOverlay('⬆️ Bước 1/2: Đang TẢI LÊN dữ liệu...');
+                    console.log('☁️ [Full Sync] Bước 1: Upload local → Cloud');
+                    const uploadResult = await sheetsAPI.saveAll(this.demoData);
+                    if (!uploadResult || !uploadResult.success) {
+                        throw new Error('Upload thất bại');
+                    }
+                    console.log('☁️ [Full Sync] Upload thành công, timestamp:', uploadResult.timestamp);
+
+                    // BƯỚC 2: Download dữ liệu từ Cloud về (để lấy thay đổi từ thiết bị khác)
+                    showSyncOverlay('⬇️ Bước 2/2: Đang TẢI VỀ dữ liệu...');
+                    console.log('☁️ [Full Sync] Bước 2: Download Cloud → local');
                     const cloudData = await sheetsAPI.fetchAll();
                     if (cloudData && this.hasCloudData(cloudData)) {
                         this.mergeCloudData(cloudData);
                         this.saveToLocalStorageOnly();
                         this.loadPage(this.currentPage);
-                        this.showNotification('☁️ Đồng bộ thành công!', 'success');
-                    } else {
-                        this.showNotification('☁️ Không có dữ liệu mới trên Cloud', 'info');
                     }
+
+                    // Cập nhật trạng thái
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                    updateSyncStatus('success', `✅ ${timeStr}`);
+                    this.showNotification('☁️ Đồng bộ 2 chiều thành công! (Tải lên ✅ → Tải về ✅)', 'success');
+
                 } catch (e) {
+                    updateSyncStatus('failed', '❌ Lỗi đồng bộ');
                     this.showNotification('❌ Lỗi đồng bộ: ' + e.message, 'error');
                 } finally {
                     hideSyncOverlay();
@@ -489,22 +655,60 @@
                 }
             }
 
-            // Đẩy dữ liệu local lên cloud
+            // ====== NÚT "TẢI VỀ" - Chỉ Download từ Cloud về local ======
+            async downloadFromCloud() {
+                if (!sheetsAPI.isConfigured) {
+                    this.showNotification('⚠️ Chưa cấu hình Google Sheets URL', 'error');
+                    return;
+                }
+                updateSyncButton(true);
+                updateSyncStatus('syncing', '⬇️ Đang tải về...');
+                showSyncOverlay('⬇️ Đang tải dữ liệu từ Google Sheets về máy...');
+                try {
+                    const cloudData = await sheetsAPI.fetchAll();
+                    if (cloudData && this.hasCloudData(cloudData)) {
+                        this.mergeCloudData(cloudData);
+                        this.saveToLocalStorageOnly();
+                        this.loadPage(this.currentPage);
+                        const now = new Date();
+                        const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                        updateSyncStatus('success', `✅ Tải về ${timeStr}`);
+                        this.showNotification('☁️ Đã tải dữ liệu từ Cloud về máy!', 'success');
+                    } else {
+                        updateSyncStatus('success', '✅ Cloud trống');
+                        this.showNotification('☁️ Không có dữ liệu trên Cloud', 'info');
+                    }
+                } catch (e) {
+                    updateSyncStatus('failed', '❌ Lỗi tải về');
+                    this.showNotification('❌ Lỗi tải về: ' + e.message, 'error');
+                } finally {
+                    hideSyncOverlay();
+                    updateSyncButton(false);
+                }
+            }
+
+            // ====== NÚT "TẢI LÊN" - Chỉ Upload từ local lên Cloud ======
             async pushToCloud() {
                 if (!sheetsAPI.isConfigured) {
                     this.showNotification('⚠️ Chưa cấu hình Google Sheets URL', 'error');
                     return;
                 }
                 updateSyncButton(true);
-                showSyncOverlay('Đang tải dữ liệu lên Google Sheets...');
+                updateSyncStatus('syncing', '⬆️ Đang tải lên...');
+                showSyncOverlay('⬆️ Đang tải dữ liệu từ máy lên Google Sheets...');
                 try {
-                    const success = await sheetsAPI.saveAll(this.demoData);
-                    if (success) {
+                    const result = await sheetsAPI.saveAll(this.demoData);
+                    if (result && result.success) {
+                        const now = new Date();
+                        const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                        updateSyncStatus('success', `✅ Tải lên ${timeStr}`);
                         this.showNotification('☁️ Đã tải dữ liệu lên Cloud!', 'success');
                     } else {
+                        updateSyncStatus('failed', '❌ Lỗi tải lên');
                         this.showNotification('❌ Lưu Cloud thất bại', 'error');
                     }
                 } catch (e) {
+                    updateSyncStatus('failed', '❌ Lỗi tải lên');
                     this.showNotification('❌ Lỗi: ' + e.message, 'error');
                 } finally {
                     hideSyncOverlay();
@@ -3657,16 +3861,26 @@
 
                 // 2. Đồng thời lưu lên Google Sheets (background, không chặn UI)
                 if (sheetsAPI.isConfigured && !this._cloudSaving) {
-                    this._cloudSaving = true;
                     // Debounce: đợi 2 giây sau lần save cuối rồi mới gửi lên cloud
                     clearTimeout(this._cloudSaveTimer);
                     this._cloudSaveTimer = setTimeout(async () => {
+                        this._cloudSaving = true;
+                        updateSyncStatus('syncing', '☁️ Đang lưu...');
                         try {
-                            console.log('☁️ Đang lưu lên Google Sheets...');
-                            await sheetsAPI.saveAll(this.demoData);
-                            console.log('☁️ Đã lưu thành công lên Cloud');
+                            console.log('☁️ Auto-push: Đang lưu lên Google Sheets...');
+                            const result = await sheetsAPI.saveAll(this.demoData);
+                            if (result && result.success) {
+                                console.log('☁️ Auto-push: Đã lưu thành công');
+                                const now = new Date();
+                                const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                                updateSyncStatus('success', `✅ Đã lưu ${timeStr}`);
+                            } else {
+                                console.warn('☁️ Auto-push: Thất bại');
+                                updateSyncStatus('failed', '⚠️ Lưu lỗi');
+                            }
                         } catch (e) {
-                            console.warn('☁️ Lỗi lưu cloud (sẽ thử lại sau):', e.message);
+                            console.warn('☁️ Auto-push: Lỗi (sẽ thử lại sau):', e.message);
+                            updateSyncStatus('failed', '⚠️ Lỗi kết nối');
                         } finally {
                             this._cloudSaving = false;
                         }
