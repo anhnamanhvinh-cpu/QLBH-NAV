@@ -605,7 +605,8 @@
             mergeCloudData(cloudData) {
                 const tables = ['customers', 'suppliers', 'products', 'categories', 'orders', 'sales'];
                 tables.forEach(table => {
-                    if (cloudData[table] && cloudData[table].length > 0) {
+                    // Chấp nhận mảng rỗng nếu nó tồn tại (để cho phép xóa dữ liệu từ cloud)
+                    if (Array.isArray(cloudData[table])) {
                         this.demoData[table] = cloudData[table];
                     }
                 });
