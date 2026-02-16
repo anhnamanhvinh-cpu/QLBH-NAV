@@ -319,21 +319,8 @@
         class FirebaseAPI {
             constructor() {
                 // Initialize Firebase
-                if (typeof firebase === 'undefined') {
-                    console.error('🔥 Firebase SDK not loaded!');
-                    updateSyncStatus('failed', '❌ Lỗi SDK');
-                    alert('Lỗi: Không tải được thư viện Firebase. Hãy kiểm tra kết nối mạng!');
-                    return;
-                }
-
                 if (!firebase.apps.length) {
-                    try {
-                        firebase.initializeApp(firebaseConfig);
-                    } catch (e) {
-                        console.error('🔥 Firebase Init Error:', e);
-                        updateSyncStatus('failed', '❌ Lỗi Config');
-                        return;
-                    }
+                    firebase.initializeApp(firebaseConfig);
                 }
                 this.db = firebase.database();
                 this.connected = false;
