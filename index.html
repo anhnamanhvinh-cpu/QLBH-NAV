@@ -328,7 +328,7 @@
             async ping() {
                 if (!this.isConfigured) return false;
                 try {
-                    const res = await fetch(this.scriptUrl + '?action=ping');
+                    const res = await fetch(this.scriptUrl + '?action=ping&_t=' + Date.now());
                     const data = await res.json();
                     return data.success === true;
                 } catch (e) {
@@ -341,7 +341,7 @@
             async getTimestamp() {
                 if (!this.isConfigured) return null;
                 try {
-                    const res = await fetch(this.scriptUrl + '?action=getTimestamp');
+                    const res = await fetch(this.scriptUrl + '?action=getTimestamp&_t=' + Date.now());
                     const json = await res.json();
                     if (json.success) {
                         return json.data; // { lastModified, deviceId }
@@ -357,7 +357,7 @@
             async fetchAll() {
                 if (!this.isConfigured) return null;
                 try {
-                    const res = await fetch(this.scriptUrl + '?action=getAll');
+                    const res = await fetch(this.scriptUrl + '?action=getAll&_t=' + Date.now());
                     const json = await res.json();
                     if (json.success) {
                         console.log('☁️ Đã tải dữ liệu từ Google Sheets');
