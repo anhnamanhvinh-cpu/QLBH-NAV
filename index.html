@@ -770,11 +770,7 @@
             generateDemoData() {
                 return {
                     customers: [
-                        { id: 'KH001', name: 'Nguyễn Văn A', type: 'ca-nhan', phone: '0901234567', email: 'nva@gmail.com', address: 'Hà Nội', debt: 0 },
-                        { id: 'KH002', name: 'Trần Thị B', type: 'ca-nhan', phone: '0912345678', email: 'ttb@gmail.com', address: 'TP.HCM', debt: 500000 },
-                        { id: 'KH003', name: 'Lê Minh C', type: 'doanh-nghiep', companyName: 'Công ty TNHH Minh Châu', department: 'Phòng mua hàng', phone: '0923456789', email: 'lmc@minhchau.com.vn', address: 'Đà Nẵng', taxCode: '0123456789', debt: 0 },
-                        { id: 'KH004', name: 'Phạm Thu D', type: 'doanh-nghiep', companyName: 'Công ty Cổ phần Thu Đức', department: 'Phòng kế toán', phone: '0934567890', email: 'ptd@thuduc.vn', address: 'Cần Thơ', taxCode: '0987654321', debt: 300000 },
-                        { id: 'KH005', name: 'Hoàng Văn E', type: 'ca-nhan', phone: '0945678901', email: 'hve@gmail.com', address: 'Hải Phòng', debt: 0 }
+                        { id: 'KH001', name: 'CÔNG TY TNHH RVC', type: 'doanh-nghiep', companyName: 'CÔNG TY TNHH RVC', department: '', phone: 'MR TÀI', email: '', address: 'TPHCM', taxCode: '', notes: '', debt: 0 }
                     ],
                     suppliers: [
                         { id: 'NCC001', name: 'Công ty TNHH ABC', phone: '024-3456-7890', email: 'abc@company.vn', address: 'Hà Nội', products: 'Điện tử' },
@@ -782,13 +778,24 @@
                         { id: 'NCC003', name: 'Công ty DEF', phone: '0236-3456-792', email: 'def@company.vn', address: 'Đà Nẵng', products: 'Thời trang' }
                     ],
                     products: [
-                        { id: 'SP001', name: 'iPhone 15 Pro', category: 'Điện thoại', price: 28900000, importPrice: 25000000, stock: 5, minStock: 10, supplier: 'NCC001' },
-                        { id: 'SP002', name: 'Samsung Galaxy S24', category: 'Điện thoại', price: 24900000, importPrice: 22000000, stock: 100, minStock: 15, supplier: 'NCC001' },
-                        { id: 'SP003', name: 'MacBook Air M2', category: 'Laptop', price: 28900000, importPrice: 26000000, stock: 15, minStock: 5, supplier: 'NCC001' },
-                        { id: 'SP004', name: 'iPad Pro 11 inch', category: 'Tablet', price: 19900000, importPrice: 18000000, stock: 8, minStock: 12, supplier: 'NCC001' },
-                        { id: 'SP005', name: 'AirPods Pro', category: 'Phụ kiện', price: 6490000, importPrice: 5500000, stock: 25, minStock: 20, supplier: 'NCC001' },
-                        { id: 'SP006', name: 'Quả bóng đá FIFA', category: 'Sản phẩm > Bóng đá', price: 500000, importPrice: 350000, stock: 50, minStock: 30, supplier: 'NCC002' },
-                        { id: 'SP007', name: 'Vợt Pickle Ball Pro', category: 'Sản phẩm > Pickle Ball', price: 800000, importPrice: 650000, stock: 30, minStock: 10, supplier: 'NCC002' }
+                        { id: '2505FZ240_W80_452.352', name: '2505FZ240_W80_452.352', category: '240gsm>>W80', importPrice: '28901.83', price: '36000', stock: '1', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2505FZ240_W80_460.800', name: '2505FZ240_W80_460.800', category: '240gsm>>W80', importPrice: '28901.82', price: '36000', stock: '3', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2505FZ260_W760_656.072', name: '2505FZ260_W760_656.072', category: '260gsm>>W760', importPrice: '28901.82', price: '36000', stock: '2', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2505FZ260_W760_650.143', name: '2505FZ260_W760_650.143', category: '260gsm>>W760', importPrice: '28901.82', price: '36000', stock: '2', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2505FZ260_W760_646.191', name: '2505FZ260_W760_646.191', category: '260gsm>>W760', importPrice: '28901.82', price: '36000', stock: '2', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2505FZ260_W525_457.300_2CUON', name: '2505FZ260_W525_457.300_2CUON', category: '260gsm>>W525', importPrice: '28901.82', price: '36000', stock: '2', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2505FZ260_W525_450.475_2CUON', name: '2505FZ260_W525_450.475_2CUON', category: '260gsm>>W525', importPrice: '28901.82', price: '36000', stock: '1', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2505FZ260_W525_447.744_2CUON', name: '2505FZ260_W525_447.744_2CUON', category: '260gsm>>W525', importPrice: '28901.82', price: '36000', stock: '1', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2505FZ260_W525_446.379_2CUON', name: '2505FZ260_W525_446.379_2CUON', category: '260gsm>>W525', importPrice: '28901.82', price: '36000', stock: '1', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2406FZ260_52.5x70_477.750', name: '2406FZ260_52.5x70_477.750', category: '260gsm>>W525', importPrice: '29112.92', price: '36000', stock: '5', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2401FZ240_W525_504.000_2CUON', name: '2401FZ240_W525_504.000_2CUON', category: '240gsm>>W525', importPrice: '28704.94', price: '36000', stock: '1', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2401FZ240_W525_491.400_2CUON', name: '2401FZ240_W525_491.400_2CUON', category: '240gsm>>W525', importPrice: '28704.94', price: '36000', stock: '1', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2401FZ240_W525_453.600_2CUON', name: '2401FZ240_W525_453.600_2CUON', category: '240gsm>>W525', importPrice: '28704.94', price: '36000', stock: '2', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2401FZ240_W760_802.560', name: '2401FZ240_W760_802.560', category: '240gsm>>W760', importPrice: '28704.94', price: '36000', stock: '1', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2401FZ240_W760_674.880', name: '2401FZ240_W760_674.880', category: '240gsm>>W760', importPrice: '28704.94', price: '36000', stock: '1', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2401FZ240_52.5x70_476.280', name: '2401FZ240_52.5x70_476.280', category: '240gsm>>W525', importPrice: '28704.94', price: '36000', stock: '11', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2310FZ240_W525_453.600_2CUON', name: '2310FZ240_W525_453.600_2CUON', category: '240gsm>>W525', importPrice: '29092.35', price: '36000', stock: '1', minStock: '0', supplier: 'FOOPAK' },
+                        { id: '2308FZ240_52.5x70_476.280', name: '2308FZ240_52.5x70_476.280', category: '240gsm>>W525', importPrice: '31280.8', price: '36000', stock: '3', minStock: '0', supplier: 'FOOPAK' }
                     ],
                     categories: [
                         { id: 'CAT001', name: 'Sản phẩm', parent: null },
@@ -800,7 +807,7 @@
                         { id: 'CAT007', name: 'Phụ kiện', parent: null }
                     ],
                     orders: this.generateOrdersWithCurrentDate(),
-                    sales: this.generateSalesWithCurrentDate()
+
                 };
             }
 
@@ -923,22 +930,7 @@
                 ];
             }
 
-            // Tạo sales với ngày hiện tại (giờ Việt Nam)
-            generateSalesWithCurrentDate() {
-                const today = this.getVietnamTime();
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
-                const twoDaysAgo = new Date(today);
-                twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
-                return [
-                    { id: 'DH001', date: today.toISOString().split('T')[0], customer: 'Nguyễn Văn A', total: 2500000, status: 'Hoàn thành', items: 3 },
-                    { id: 'DH002', date: today.toISOString().split('T')[0], customer: 'Trần Thị B', total: 1800000, status: 'Chờ xử lý', items: 2 },
-                    { id: 'DH003', date: yesterday.toISOString().split('T')[0], customer: 'Lê Minh C', total: 3200000, status: 'Đang giao', items: 4 },
-                    { id: 'DH004', date: yesterday.toISOString().split('T')[0], customer: 'Phạm Thu D', total: 950000, status: 'Hoàn thành', items: 1 },
-                    { id: 'DH005', date: twoDaysAgo.toISOString().split('T')[0], customer: 'Hoàng Văn E', total: 4200000, status: 'Hoàn thành', items: 5 }
-                ];
-            }
 
             // Helper function để lấy thời gian Việt Nam (UTC+7)
             getVietnamTime() {
@@ -1589,18 +1581,21 @@
             }
 
             getSalesContent() {
-                const salesTable = this.demoData.sales.map(sale => `
+                const orders = this.demoData.orders; // Unified: Use orders as source
+
+                const salesTable = orders.map(order => `
                     <div class="activity-item">
-                        <div class="activity-icon ${sale.status === 'Hoàn thành' ? 'success' : sale.status === 'Chờ xử lý' ? 'warning' : 'info'}">💰</div>
+                        <div class="activity-icon ${order.status === 'Hoàn thành' ? 'success' : order.status === 'Chờ xử lý' ? 'warning' : 'info'}">💰</div>
                         <div class="activity-content">
-                            <div class="activity-title">Đơn hàng ${sale.id} - ${sale.customer}</div>
-                            <div class="activity-desc">💰 ${sale.total.toLocaleString('vi-VN')} VNĐ | 📦 ${sale.items} sản phẩm | 📞 ${sale.customPhuocIThone || ''} | 📅 ${sale.date}</div>
+                            <div class="activity-title">Đơn hàng ${order.id} - ${order.customerName}</div>
+                            <div class="activity-desc">💰 ${order.total.toLocaleString('vi-VN')} VNĐ | 📦 ${order.products ? order.products.length : 0} sản phẩm | 📞 ${order.customerPhone || ''} | 📅 ${order.date}</div>
                         </div>
-                        <div class="activity-time">${sale.status}</div>
+                        <div class="activity-time">${order.status}</div>
                     </div>
                 `).join('');
 
-                const totalRevenue = this.demoData.sales.reduce((sum, sale) => sum + sale.total, 0);
+                const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+                const completedOrders = orders.filter(s => s.status === 'Hoàn thành').length;
 
                 return `
                     <div class="fade-in">
@@ -1611,7 +1606,7 @@
                                     <span class="stat-icon">💰</span>
                                 </div>
                                 <div class="stat-value">${totalRevenue.toLocaleString('vi-VN')} VNĐ</div>
-                                <div class="stat-change positive">5 đơn hàng</div>
+                                <div class="stat-change positive">${orders.length} đơn hàng</div>
                             </div>
                             
                             <div class="stat-card orders">
@@ -1619,7 +1614,7 @@
                                     <span class="stat-title">Đơn hoàn thành</span>
                                     <span class="stat-icon">✅</span>
                                 </div>
-                                <div class="stat-value">${this.demoData.sales.filter(s => s.status === 'Hoàn thành').length}</div>
+                                <div class="stat-value">${completedOrders}</div>
                                 <div class="stat-change positive">Đã thanh toán</div>
                             </div>
                         </div>
@@ -4439,8 +4434,8 @@
                 this.loadPage('company-info');
             }
 
-            // Sales Management Functions
-            showCreateSaleForm() {
+            // Sales/Order Management Functions
+            showCreateOrderForm() {
                 const customerOptions = this.demoData.customers.map(c =>
                     `<option value="${c.id}">${c.name} - ${c.phone}</option>`
                 ).join('');
@@ -4453,7 +4448,7 @@
                     <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1001; display: flex; justify-content: center; align-items: center; overflow-y: auto;" onclick="closeModal(this)">
                         <div style="background: white; padding: 32px; border-radius: 12px; width: 1000px; max-width: 95vw;" onclick="event.stopPropagation()">
                             <h3 style="margin-bottom: 24px; color: var(--text-primary);">Tạo đơn bán hàng mới</h3>
-                            <form onsubmit="app.createSaleOrder(event)">
+                            <form onsubmit="app.createOrder(event)">
                                 <div style="margin-bottom: 16px;">
                                     <label style="display: block; margin-bottom: 8px; font-weight: 600;">Tên khách hàng:</label>
                                     <input type="text" name="customerName" required placeholder="Nhập tên khách hàng" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px;">
@@ -4628,7 +4623,7 @@
                 console.log('=== calculateTotal kết thúc ===');
             }
 
-            createSaleOrder(event) {
+            createOrder(event) {
                 event.preventDefault();
                 const form = event.target;
                 const formData = new FormData(form);
@@ -4664,11 +4659,10 @@
                         }
 
                         items.push({
-                            productId: products[i],
-                            productName: product.name,
+                            id: products[i],        // Unified: id instead of productId
+                            name: product.name,    // Unified: name instead of productName
                             quantity: qty,
-                            price: price,
-                            subtotal: qty * price
+                            price: price
                         });
 
                         total += qty * price;
@@ -4678,23 +4672,32 @@
                     }
                 }
 
-                const newSale = {
-                    id: 'DH' + String(this.demoData.sales.length + 1).padStart(3, '0'),
-                    date: this.getVietnamTime().toISOString().split('T')[0],
-                    customer: customerInfo.name,
-                    customPhuocIThone: customerInfo.phone,
+                const newOrder = {
+                    id: 'DH' + String(this.demoData.orders.length + 1).padStart(3, '0'),
+                    customerId: 'KH000', // Default ID for walk-in/new customers
+                    customerName: customerInfo.name,
+                    // Phone and Address are not in standard 'orders' demo data yet, but good to keep
+                    customerPhone: customerInfo.phone,
                     customerAddress: customerInfo.address,
-                    notes: formData.get('orderNotes') || '',
+
+                    date: this.getVietnamTime().toISOString().split('T')[0],
+                    time: this.getVietnamTime().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+
+                    products: items,
                     total: total,
-                    status: 'Chờ xử lý',
-                    items: items.length,
-                    itemDetails: items
+                    status: 'Mới',
+                    paymentMethod: 'Tiền mặt', // Default to Cash
+                    paymentStatus: 'Công nợ',   // Default to Debt
+                    notes: formData.get('orderNotes') || ''
                 };
 
-                this.demoData.sales.unshift(newSale);
-                this.saveToLocalStorage();
-                this.showNotification(`Đã tạo đơn hàng ${newSale.id} thành công`, 'success');
-                this.loadPage('sales');
+                this.demoData.orders.unshift(newOrder);
+
+                // Save to Cloud (Firebase) via saveAll
+                this.saveAll(this.demoData);
+
+                this.showNotification(`Đã tạo đơn hàng ${newOrder.id} thành công`, 'success');
+                this.loadPage(this.currentPage);
                 const modal = form.closest("div[style*=\"fixed\"]"); if (modal) modal.remove();
             }
 
